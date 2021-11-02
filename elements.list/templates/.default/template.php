@@ -2,7 +2,7 @@
 $this->setFrameMode(true);
 ?>
 
-<div id="<?= $arParams['AJAX_COMPONENT_ID'] ?>">
+<div <?= $arParams['AJAX_COMPONENT_ID'] ? 'id="' . $arParams['AJAX_COMPONENT_ID'] . '"' : '' ?>>
     <? if ($arParams['DISPLAY_TOP_PAGER'] === 'Y') : ?>
         <div data-ajax-links>
             <?= $arResult['NAV_STRING'] ?>

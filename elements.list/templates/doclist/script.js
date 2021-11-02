@@ -45,7 +45,6 @@ if (typeof setListeners !== 'function') {
         }
 
         Array.from(componentContainer.querySelectorAll('*[data-ajax-links] a')).forEach((el) => {
-            console.log(el);
             const href = new URL(el.href);
             if (href.pathname === window.location.pathname) {
                 aTags.push(el);

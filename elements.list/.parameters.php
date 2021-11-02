@@ -89,15 +89,12 @@ try {
 
         $rsUserFields = $USER_FIELD_MANAGER->GetUserFields('IBLOCK_' . $arCurrentValues['IBLOCK_ID'] . '_SECTION', 0, LANGUAGE_ID);
         foreach ($rsUserFields as $FIELD_NAME => $arUserField) {
-            //d($arUserField);
             $arUserField['LIST_COLUMN_LABEL'] = (string)$arUserField['LIST_COLUMN_LABEL'];
-
             $property_UF[$FIELD_NAME] =
                 $arUserField['LIST_COLUMN_LABEL']
                 ? '[' . $FIELD_NAME . ']' . $arUserField['LIST_COLUMN_LABEL']
                 : $FIELD_NAME;
         }
-        unset($rsUserFields);
     }
 
     $sortOrders = [
@@ -122,9 +119,6 @@ try {
             'SEO' => [
                 'NAME' => Loc::getMessage('KMIAC_ELEMENTS_LIST_GROUP_SEO')
             ],
-            'OTHERS' => [
-                'NAME' => Loc::getMessage('KMIAC_ELEMENTS_LIST_GROUP_OTHERS')
-            ]
         ],
         'PARAMETERS' => [
             'IBLOCK_TYPE' => [
@@ -190,17 +184,6 @@ try {
                 'VALUES' => $elementProperties,
                 'ADDITIONAL_VALUES' => 'Y',
             ],
-            /*
-            'RESULT_PROCESSING_MODE' => [
-                'PARENT' => 'DATA_SOURCE',
-                'NAME' => Loc::getMessage('KMIAC_ELEMENTS_LIST_RESULT_PROCESSING_MODE'),
-                'TYPE' => 'LIST',
-                'VALUES' => [
-                    'DEFAULT' => Loc::getMessage('KMIAC_ELEMENTS_LIST_RESULT_PROCESSING_MODE_DEFAULT'),
-                    'EXTENDED' => Loc::getMessage('KMIAC_ELEMENTS_LIST_RESULT_PROCESSING_MODE_EXTENDED')
-                ]
-            ],
-            */
             'EX_FILTER_NAME' => [
                 'PARENT' => 'DATA_SOURCE',
                 'NAME' => Loc::getMessage('KMIAC_ELEMENTS_LIST_EX_FILTER_NAME'),
@@ -265,20 +248,20 @@ try {
                 'DEFAULT' => 'Y'
             ],
             'SET_404' => [
-                'PARENT' => 'OTHERS',
+                'PARENT' => 'ADDITIONAL_SETTINGS',
                 'NAME' => Loc::getMessage('KMIAC_ELEMENTS_LIST_SET_404'),
                 'TYPE' => 'CHECKBOX',
                 'DEFAULT' => 'N'
             ],
             'CHECK_PERMISSIONS' => [
-                'PARENT' => 'OTHERS',
+                'PARENT' => 'ADDITIONAL_SETTINGS',
                 'NAME' => Loc::getMessage('KMIAC_ELEMENTS_LIST_CHECK_PERMISSIONS'),
                 'TYPE' => 'CHECKBOX',
                 'DEFAULT' => 'Y'
             ],
             'DATE_FORMAT' => CIBlockParameters::GetDateFormat(
                 Loc::getMessage('KMIAC_ELEMENTS_LIST_DATE_FORMAT'),
-                'OTHERS'
+                'ELEMENTS_LIST'
             ),
             'CACHE_GROUPS' => [
                 'PARENT' => 'CACHE_SETTINGS',
@@ -299,18 +282,12 @@ try {
                 $arComponentParameters['PARAMETERS'],
                 'DISPLAY_UNPARENT',
                 [
-                    'SECTION_ID' => [
+                    'ALL_SECTIONS' => [
                         'PARENT' => 'DATA_SOURCE',
-                        'NAME' => Loc::getMessage('KMIAC_ELEMENTS_LIST_SECTION_ID'),
-                        'TYPE' => 'LIST',
-                        'MULTIPLE' => 'Y',
-                        'VALUES' => $sections,
-                    ],
-                    'INCLUDE_SUBSECTIONS' => [
-                        'PARENT' => 'DATA_SOURCE',
-                        'NAME' => Loc::getMessage('KMIAC_ELEMENTS_LIST_INCLUDE_SUBSECTIONS'),
+                        'NAME' => Loc::getMessage('KMIAC_ELEMENTS_LIST_DISPLAY_ALL'),
                         'TYPE' => 'CHECKBOX',
-                        'DEFAULT' => 'Y'
+                        'DEFAULT' => 'N',
+                        'REFRESH' => 'Y',
                     ],
                     'CHECK_GLOBAL_ACTIVE' => [
                         'PARENT' => 'DATA_SOURCE',
@@ -318,8 +295,32 @@ try {
                         'TYPE' => 'CHECKBOX',
                         'DEFAULT' => 'Y'
                     ],
+
                 ]
             );
+        if ($arCurrentValues['ALL_SECTIONS'] !== 'Y') {
+            $arComponentParameters['PARAMETERS'] =
+                array_insert_after(
+                    $arComponentParameters['PARAMETERS'],
+                    'ALL_SECTIONS',
+                    [
+                        'SECTION_ID' => [
+                            'PARENT' => 'DATA_SOURCE',
+                            'NAME' => Loc::getMessage('KMIAC_ELEMENTS_LIST_SECTION_ID'),
+                            'TYPE' => 'LIST',
+                            'MULTIPLE' => 'Y',
+                            'VALUES' => $sections,
+                        ],
+                        'INCLUDE_SUBSECTIONS' => [
+                            'PARENT' => 'DATA_SOURCE',
+                            'NAME' => Loc::getMessage('KMIAC_ELEMENTS_LIST_INCLUDE_SUBSECTIONS'),
+                            'TYPE' => 'CHECKBOX',
+                            'DEFAULT' => 'Y'
+                        ],
+
+                    ]
+                );
+        }
 
         $arComponentParameters['PARAMETERS']['SECTIONS_SORT_BY_1'] = [
             'PARENT' => 'SECTIONS_LIST',

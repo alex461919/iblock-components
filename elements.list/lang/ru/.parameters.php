@@ -2,13 +2,14 @@
 
 $MESS['KMIAC_ELEMENTS_LIST_GROUP_SEO'] = 'Поисковая оптимизация';
 $MESS['KMIAC_ELEMENTS_LIST_GROUP_AJAX'] = 'Аякс';
-$MESS['KMIAC_ELEMENTS_LIST_GROUP_OTHERS'] = 'Прочее';
+//$MESS['KMIAC_ELEMENTS_LIST_GROUP_OTHERS'] = 'Прочее';
 
 $MESS['KMIAC_ELEMENTS_LIST_IBLOCK_TYPE'] = 'Тип инфоблока';
 $MESS['KMIAC_ELEMENTS_LIST_IBLOCK_ID'] = 'Инфоблок';
 $MESS['KMIAC_ELEMENTS_LIST_SECTION_ID'] = 'Разделы';
 //$MESS['KMIAC_ELEMENTS_LIST_SECTION_CODE'] = 'Символьный код раздела';
 $MESS['KMIAC_ELEMENTS_LIST_INCLUDE_SUBSECTIONS'] = 'Включая элементы подразделов';
+
 
 //$MESS['SECTION_CODE_TIP'] = 'Заполняется, если выборка по идентификаторам (из списка выше) не подходит';
 
@@ -64,3 +65,4 @@ $MESS["KMIAC_ELEMENTS_LIST_GROUP_ELEMENTS_LIST"] = "Настройки спис�
 $MESS["KMIAC_ELEMENTS_LIST_USER_FIELDS"] = 'Возвращаемые пользовательские поля';
 $MESS["KMIAC_ELEMENTS_LIST_CHECK_DATES"] = "Показывать только активные на данный момент элементы";
 $MESS["KMIAC_ELEMENTS_LIST_CHECK_GLOBAL_ACTIVE"] = "Проверяется активность родительских разделов";
+$MESS['KMIAC_ELEMENTS_LIST_DISPLAY_ALL'] = "Выводить все разделы";

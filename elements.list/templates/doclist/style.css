@@ -1,0 +1,15 @@
+.doclist-size,
+.doclist-date {
+    opacity: 0.6;
+}
+.doclist-size,
+.doclist-date,
+.doclist-download-link {
+    font-size: 0.875rem;
+}
+.doclist-item:not(:last-child) {
+    border-bottom: 1px solid var(--gray-300);
+}
+.doclist-item:hover {
+    background-color: var(--gray-100);
+}

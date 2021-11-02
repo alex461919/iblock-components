@@ -48,14 +48,16 @@ class ElementsList extends Bbc\Basis
     protected function checkParams()
     {
         $this->arParams = self::getTrimmedParams($this->arParams);
+        $this->arParams['DISPLAY_UNPARENT'] = $this->arParams['DISPLAY_UNPARENT'] === 'Y';
+        $this->arParams['ALL_SECTIONS'] = $this->arParams['ALL_SECTIONS'] === 'Y';
+        $this->arParams['CHECK_GLOBAL_ACTIVE'] = $this->arParams['CHECK_GLOBAL_ACTIVE'] !== 'N';
+        $this->arParams['CHECK_DATES'] = $this->arParams['CHECK_DATES'] !== 'N';
 
         if ($this->arParams['IBLOCK_ID'] <= 0) {
             throw new Main\ArgumentOutOfRangeException('IBLOCK_ID', 1);
         }
 
-        if ($this->arParams['DISPLAY_UNPARENT'] === 'Y') {
-        } else {
-
+        if (!$this->arParams['DISPLAY_UNPARENT'] && !$this->arParams['ALL_SECTIONS']) {
             if (empty($this->arParams['SECTION_ID']))
                 throw new Main\ArgumentNullException('SECTION_ID');
 
@@ -74,24 +76,23 @@ class ElementsList extends Bbc\Basis
 
     protected function executeMain()
     {
-        AddMessage2Log('start executeMain');
 
-        if ($this->arParams['DISPLAY_UNPARENT'] === 'Y') {
-
+        if ($this->arParams['DISPLAY_UNPARENT'] || $this->arParams['ALL_SECTIONS']) {
             $this->filterParams['SECTION_ID'] = false;
             unset($this->filterParams['INCLUDE_SUBSECTIONS']);
-        } elseif ($this->arParams['CHECK_GLOBAL_ACTIVE'] !== 'N') {
+        }
+        if (!$this->arParams['DISPLAY_UNPARENT'] && $this->arParams['CHECK_GLOBAL_ACTIVE']) {
             $this->filterParams['SECTION_GLOBAL_ACTIVE'] = 'Y';
         }
 
-        if ($this->arParams['CHECK_DATES'] !== 'N') {
+        if ($this->arParams['CHECK_DATES']) {
             $this->filterParams['ACTIVE_DATE'] = 'Y';
         }
         unset($this->filterParams['IBLOCK_TYPE']);
 
         $this->filterParams['IBLOCK_LID'] = SITE_ID;
 
-        if ($this->arParams['DISPLAY_UNPARENT'] !== 'Y') {
+        if (!$this->arParams['DISPLAY_UNPARENT']) {
             $arSelect = array_merge(
                 [
                     'IBLOCK_ID',
@@ -117,14 +118,14 @@ class ElementsList extends Bbc\Basis
             $arFilter = [
                 'IBLOCK_ID' => $this->arParams['IBLOCK_ID'],
             ];
-            if ($this->arParams['CHECK_GLOBAL_ACTIVE'] !== 'N') {
+            if ($this->arParams['CHECK_GLOBAL_ACTIVE']) {
                 $arFilter['GLOBAL_ACTIVE'] = 'Y';
             }
 
             $entity = \Bitrix\Iblock\Model\Section::compileEntityByIblock($this->arParams['IBLOCK_ID']);
             $rsSections = $entity::getList(array(
                 'order' => $arOrder,
-                'filter' => array_merge($arFilter, ['ID' => $this->arParams['SECTION_ID']]),
+                'filter' => $this->arParams['ALL_SECTIONS'] ? $arFilter : array_merge($arFilter, ['ID' => $this->arParams['SECTION_ID']]),
                 'select' => $arSelect,
             ));
 
@@ -190,8 +191,6 @@ class ElementsList extends Bbc\Basis
         while ($element = $rsElements->$processingMethod()) {
             if ($arElement = $this->processingElementsResult($element)) {
 
-                $ipropValues = new Iblock\InheritedProperty\ElementValues($arElement["IBLOCK_ID"], $arElement["ID"]);
-                $arElement["IPROPERTY_VALUES"] = $ipropValues->getValues();
                 Iblock\Component\Tools::getFieldImageData(
                     $arElement,
                     array('PREVIEW_PICTURE', 'DETAIL_PICTURE'),
@@ -205,13 +204,28 @@ class ElementsList extends Bbc\Basis
                             $arElement["DISPLAY_PROPERTIES"][$propCode] = \CIBlockFormatProperties::GetDisplayValue($arElement, $arElement['PROPS'][$propCode]);
                     }
                 }
+                foreach ([
+                    'DATE_ACTIVE_FROM',
+                    'ACTIVE_FROM',
+                    'ACTIVE_TO',
+                    'DATE_CREATE',
+                    'TIMESTAMP_X',
+                    'DATE_ACTIVE_TO'
+                ] as $field) {
+                    if (empty($arElement[$field])) continue;
+                    $arElement["DISPLAY_" . $field] = \CIBlockFormatProperties::DateFormat(
+                        $this->arParams["DATE_FORMAT"],
+                        MakeTimeStamp($arElement[$field], \CSite::GetDateFormat())
+                    );
+                }
+
                 $this->arResult['ELEMENTS'][$arElement['ID']] = $arElement;
             }
         }
         if ($this->arParams['SET_404'] === 'Y' && empty($this->arResult['ELEMENTS'])) {
             $this->return404();
         }
-        if ($this->arParams['DISPLAY_UNPARENT'] !== 'Y') {
+        if (!$this->arParams['DISPLAY_UNPARENT']) {
             $arGroups = self::getElementGroups(array_keys($this->arResult['ELEMENTS']));
 
             foreach ($this->arResult['ELEMENTS'] as $id => $arElement) {
